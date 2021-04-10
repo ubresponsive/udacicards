@@ -46,35 +46,32 @@ const View = styled.View`
 	align-items: center;
 `;
 const H1 = styled.Text`
-	font-size: 1.75em;
+	font-size: 28px;
 	color: rgb(68, 51, 255);
 	font-weight: 500;
 	padding: 20px;
 	margin: 20px 0 0;
-	display: block;
 	text-align: center;
 	font-family: 'Avenir-Heavy';
 `;
 
 const H2 = styled.Text`
-	font-size: 1.5em;
+	font-size: 24px;
 	color: rgb(230, 0, 103);
 	font-weight: 500;
 	padding-bottom: 10px;
 	margin: 0 auto;
-	display: block;
 	text-align: center;
 	font-family: 'Avenir-Medium';
 `;
 
 const H3 = styled.Text`
-	font-size: 1.2em;
+	font-size: 20px;
 	color: #000;
 	font-weight: 500;
 	padding-bottom: 10px;
 	margin: 0 auto;
 	width: 100%;
-	display: block;
 	text-align: center;
 	font-family: 'Avenir-Medium';
 `;
@@ -84,7 +81,6 @@ const Tile = styled.Text`
 	margin: 0 auto;
 	width: 100%;
 	max-width: 800px;
-	display: block;
 	background: #dfebf6;
 	font-family: 'Avenir-Medium';
 	border-bottom-width: 2px;
@@ -92,7 +88,7 @@ const Tile = styled.Text`
 `;
 
 const Text = styled.Text`
-	font-size: 1em;
+	font-size: 16px;
 	color: black;
 	font-family: 'Avenir';
 `;
@@ -100,7 +96,6 @@ const Text = styled.Text`
 const Input = styled.TextInput`
 	border: 1px solid #000;
 	width: 80%;
-	display: block;
 	margin: 20px auto 20px;
 	height: 50px;
 	padding: 10px;
@@ -109,8 +104,8 @@ const Input = styled.TextInput`
 
 const ButtonContainer = styled.TouchableOpacity`
 	flex: 1;
-	font-size: 1em;
-	margin: 1em auto;
+	font-size: 16px;
+	margin: 16px auto;
 	height: 40px;
 	padding: 0 20px;
 	border-radius: 3px;
@@ -127,7 +122,7 @@ const ButtonContainer = styled.TouchableOpacity`
 		`}
 `;
 const ButtonText = styled.Text`
-	font-size: 1em;
+	font-size: 16px;
 	text-align: center;
 	font-family: 'Avenir';
 `;
@@ -139,7 +134,7 @@ const PressableButton = ({ onPress, bgColor, title }) => (
 );
 
 const Success = styled.Text`
-	font-size: 1em;
+	font-size: 16px;
 	text-align: center;
 	font-family: 'Avenir-Book';
 	border-radius: 5px;
@@ -158,7 +153,7 @@ const Success = styled.Text`
 `;
 
 const Error = styled.Text`
-	font-size: 1em;
+	font-size: 16px;
 	text-align: center;
 	font-family: 'Avenir-Book';
 	display: flex;

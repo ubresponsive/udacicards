@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	StyleSheet,
 	View,
@@ -15,16 +15,21 @@ import {
 	Card,
 	Text,
 	Icon,
+	Badge,
 } from 'react-native-elements';
 import styled, { css } from 'styled-components/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDeck } from '../utils/helpers';
 
 function Question({ route, navigation }) {
 	// push index and hide button, activate silent onclick if another question exists
 	console.log('route.params', route.params);
-	const { questions, qId } = route.params;
-	const count = questions.length;
+	const [isReady, setIsReady] = useState(false);
+	const { questions, deckId, qId } = route.params;
+	const [deck, setDeck] = useState({});
+	const [count, setCount] = useState(questions.length);
 	const [showQ, setShowQ] = useState(true);
+	const [isDone, setIsDone] = useState(false);
+	const [isSuccess, setIsSuccess] = useState(false);
 	const [results, setResults] = useState(0);
 
 	const toggleQA = (type) => {
@@ -35,173 +40,262 @@ function Question({ route, navigation }) {
 		}
 	};
 
-	return (
-		<View style={{ flex: 1, padding: 20, flexDirection: 'column' }}>
-			<Card style={{ flex: 1 }}>
-				<Card.Title
-					style={{
-						fontSize: '1.2em',
-						color: '#000',
-						fontWeight: '500',
-						width: '100%',
-						textAlign: 'center',
-						fontFamily: 'Avenir-Heavy',
-					}}
-				>
-					{qId + 1}/{count} - results {results}/{count}
-				</Card.Title>
-				<Card.Divider />
-				{showQ && (
-					<View>
-						<Text
-							h2
-							h2Style={{
-								color: '#e91e63',
-								fontWeight: 500,
-								fontSize: '1em',
-								fontFamily: 'Avenir-Heavy',
-								textAlign: 'center',
-								padding: '20px',
-							}}
-						>
-							{questions[qId].question}
-						</Text>
-						<Text>
-							<View style={styles.buttonsContainer}>
-								<Button
-									onPress={() => toggleQA('a')}
-									type="clear"
-									titleStyle={{
-										color: 'rgb(68, 51, 255)',
-										fontFamily: 'Avenir-Medium',
-										fontSize: '1em',
-									}}
-									buttonStyle={{
-										backgroundColor: 'transparent',
-									}}
-									containerStyle={{
-										marginVertical: 5,
-									}}
-									title="Show Answer"
-								></Button>
-							</View>
-						</Text>
-					</View>
-				)}
-				{!showQ && (
-					<View>
-						<Text
-							h2
-							h2Style={{
-								color: '#e91e63',
-								fontWeight: 500,
-								fontSize: '1em',
-								fontFamily: 'Avenir-Heavy',
-								textAlign: 'center',
-								padding: '20px',
-							}}
-						>
-							{questions[qId].answer}
-						</Text>
-						<Text>
-							<View style={styles.buttonsContainer}>
-								<Button
-									onPress={() => toggleQA('q')}
-									type="clear"
-									titleStyle={{
-										color: 'rgb(68, 51, 255)',
-										fontFamily: 'Avenir-Medium',
-										fontSize: '1em',
-									}}
-									buttonStyle={{
-										backgroundColor: 'transparent',
-									}}
-									containerStyle={{
-										marginVertical: 5,
-									}}
-									title="Show Question"
-								></Button>
-							</View>
-						</Text>
-					</View>
-				)}
-				<View>
-					<View style={styles.buttonsContainer}>
-						<Button
-							onPress={() => {
-								setResults(results !== count ? results + 1 : count);
-								setShowQ(true);
-								if (qId !== count) {
-									navigation.navigate('Question', {
-										questions,
-										qId: qId !== count ? qId + 1 : count,
-									});
-								}
-							}}
-							title="Correct"
-							buttonStyle={{
-								backgroundColor: 'green',
-								borderRadius: 3,
-							}}
-							containerStyle={{
-								marginVertical: 10,
-							}}
-						/>
-						<Button
-							title="Incorrect"
-							onPress={() => {
-								if (qId !== count) {
-									navigation.navigate('Question', {
-										questions,
-										qId: qId !== count ? qId + 1 : count,
-									});
-								}
-							}}
-							buttonStyle={{
-								backgroundColor: 'red',
-								borderRadius: 3,
-							}}
-							containerStyle={{
-								marginVertical: 10,
-							}}
-						/>
+	async function fetchData() {
+		const data = await getDeck(deckId);
+		setDeck(data);
+		console.log('data', data);
+		setCount(data[1].questions.length);
+		setIsReady(true);
+	}
 
-						<Button
-							onPress={() => {
-								setShowQ(true);
-								navigation.navigate('Question', {
-									questions,
-									qId: 1,
-								});
-							}}
-							containerStyle={{
-								marginVertical: 20,
-							}}
-							title="Next Question"
-						/>
+	useEffect(() => {
+		const unsubscribe = navigation.addListener('focus', () => {
+			fetchData();
+		});
+
+		return unsubscribe;
+	}, [navigation]);
+
+	if (!isReady) {
+		return (
+			<View
+				style={{
+					flex: 1,
+					justifyContent: 'center',
+					flexDirection: 'row',
+					padding: 10,
+				}}
+			>
+				<ActivityIndicator size="large" />
+			</View>
+		);
+	}
+
+	console.log('count', count);
+	console.log('qId', qId);
+
+	return (
+		<ScrollView>
+			<View
+				style={{
+					flex: 1,
+					padding: 20,
+				}}
+			>
+				<Card style={{ flex: 1 }}>
+					<Card.Title
+						style={{
+							fontSize: 20,
+							color: '#000',
+							fontWeight: '500',
+							width: '100%',
+							textAlign: 'center',
+							fontFamily: 'Avenir-Heavy',
+							marginBottom: 10,
+						}}
+					>
+						Card {qId + 1}/{count}
+					</Card.Title>
+					<Badge
+						value={`${results}`}
+						status="success"
+						containerStyle={{ position: 'absolute', top: -4, right: -4 }}
+					/>
+					<Card.Divider />
+					<View>
+						{isSuccess && (
+							<View>
+								<Success>Quiz Complete</Success>
+								<Text
+									style={{
+										flex: 1,
+										flexDirection: 'column',
+										justifyContent: 'center',
+										fontFamily: 'Avenir-Book',
+										textAlign: 'center',
+										fontWeight: 'bold',
+										alignItems: 'center',
+										color: 'green',
+										fontSize: 14,
+										marginVertical: 5,
+									}}
+								>
+									Score: {results}/{count}
+								</Text>
+								<View style={theme.buttonsContainer}>
+									<Button
+										onPress={() => navigation.navigate('Decks')}
+										type="clear"
+										titleStyle={{
+											color: '#000',
+											fontFamily: 'Avenir-Medium',
+											fontSize: 14,
+										}}
+										buttonStyle={{
+											backgroundColor: 'transparent',
+										}}
+										containerStyle={{
+											marginVertical: 0,
+										}}
+										title="Home"
+										icon={
+											<Icon
+												name="home"
+												color="black"
+												containerStyle={{
+													fontSize: 30,
+													marginRight: 5,
+												}}
+											/>
+										}
+									></Button>
+								</View>
+							</View>
+						)}
+
+						{!isDone && (
+							<View>
+								{showQ && (
+									<View>
+										<View>
+											<Text
+												h2
+												h2Style={{
+													color: '#e91e63',
+													fontWeight: '500',
+													fontSize: 14,
+													fontFamily: 'Avenir-Heavy',
+													textAlign: 'center',
+													paddingTop: 10,
+												}}
+											>
+												{deck[1].questions[qId].question}
+											</Text>
+										</View>
+										<View style={theme.buttonsContainer}>
+											<Button
+												onPress={() => toggleQA('a')}
+												type="clear"
+												titleStyle={{
+													color: 'rgb(68, 51, 255)',
+													fontSize: 14,
+													minHeight: 40,
+													fontFamily: 'Avenir-Medium',
+												}}
+												buttonStyle={{
+													backgroundColor: 'transparent',
+												}}
+												containerStyle={{
+													marginTop: 5,
+												}}
+												title="Show Answer"
+											/>
+										</View>
+									</View>
+								)}
+								{!showQ && (
+									<View>
+										<Text
+											h2
+											h2Style={{
+												color: '#e91e63',
+												fontWeight: '500',
+												fontSize: 14,
+												fontFamily: 'Avenir-Heavy',
+												textAlign: 'center',
+												paddingTop: 10,
+											}}
+										>
+											{deck[1].questions[qId].answer}
+										</Text>
+
+										<View style={{ display: 'block', width: '100%' }}>
+											<Button
+												onPress={() => toggleQA('q')}
+												type="clear"
+												titleStyle={{
+													color: 'rgb(68, 51, 255)',
+													fontFamily: 'Avenir-Medium',
+													fontSize: 14,
+												}}
+												buttonStyle={{
+													backgroundColor: 'transparent',
+												}}
+												containerStyle={{
+													marginVertical: 5,
+													display: 'block',
+													width: '100%',
+												}}
+												title="Show Question"
+											></Button>
+										</View>
+									</View>
+								)}
+								<View style={theme.buttonsContainer}>
+									<Button
+										onPress={() => {
+											setResults(results !== count ? results + 1 : count);
+											setShowQ(true);
+											if (qId !== count - 1) {
+												navigation.navigate('Question', {
+													questions,
+													qId: qId !== count - 1 ? qId + 1 : count - 1,
+												});
+											} else {
+												setIsSuccess(true);
+												setIsDone(true);
+											}
+										}}
+										title="Correct"
+										buttonStyle={{
+											backgroundColor: 'green',
+										}}
+									/>
+								</View>
+								<View style={theme.buttonsContainer}>
+									<Button
+										title="Incorrect"
+										onPress={() => {
+											if (qId !== count - 1) {
+												navigation.navigate('Question', {
+													questions,
+													qId: qId !== count - 1 ? qId + 1 : count - 1,
+												});
+											} else {
+												setIsSuccess(true);
+												setIsDone(true);
+											}
+										}}
+										buttonStyle={{
+											backgroundColor: 'red',
+										}}
+									/>
+								</View>
+							</View>
+						)}
 					</View>
-				</View>
-			</Card>
-		</View>
+				</Card>
+			</View>
+		</ScrollView>
 	);
 }
 
 export default Question;
+
 const theme = {
 	Text: {
 		fontFamily: 'Avenir-Regular',
 	},
 	h1Style: {
 		color: 'red',
-		fontSize: '20px',
+		fontSize: 20,
 		fontFamily: 'Avenir-Book',
 		textAlign: 'center',
 	},
 	Button: {
-		raised: true,
 		titleStyle: {
 			color: 'white',
-			fontSize: '1em',
+			fontSize: 14,
 		},
 		buttonStyle: {
 			flex: 1,
@@ -209,25 +303,40 @@ const theme = {
 			justifyContent: 'center',
 			alignItems: 'center',
 			backgroundColor: '#e60067',
-			padding: '20px 30px',
-			height: '40px',
-			padding: '10px',
-			borderRadius: '3px',
-			minWidth: '10em',
-			marginVertical: 20,
+			minWidth: 140,
 		},
-		containerStyle: {
-			textAlign: 'center',
-			flexDirection: 'row',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginVertical: 20,
-		},
+	},
+	buttonsContainer: {
+		flex: 1,
+		flexDirection: 'column',
+		marginVertical: 10,
+		justifyContent: 'center',
+		alignItems: 'center',
+		minHeight: 40,
 	},
 };
 
+const Success = styled.Text`
+	font-size: 16px;
+	text-align: center;
+	font-family: 'Avenir-Heavy';
+	border-radius: 5px;
+	text-align: center;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	align-content: center;
+	width: 80%;
+	margin: 10px auto 10px;
+	border: 1px solid rgb(2, 141, 2);
+	background: rgb(171, 207, 171);
+	padding: 15px;
+	color: rgb(2, 141, 2);
+`;
+
 const Error = styled.Text`
-	font-size: 1em;
+	font-size: 16px;
 	text-align: center;
 	font-family: 'Avenir-Book';
 	display: flex;
@@ -244,17 +353,3 @@ const Error = styled.Text`
 	padding: 15px;
 	color: rgba(214, 16, 16, 0.925);
 `;
-
-const styles = StyleSheet.create({
-	contentView: {
-		flex: 1,
-	},
-	buttonsContainer: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		justifyContent: 'center',
-		alignItems: 'center',
-		width: '100%',
-		marginVertical: 20,
-	},
-});

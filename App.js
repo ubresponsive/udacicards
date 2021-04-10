@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect, useReducer, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'react-native-gesture-handler';
 import {
 	SafeAreaView,
@@ -20,11 +20,7 @@ import {
 	Text,
 	Icon,
 } from 'react-native-elements';
-import {
-	NavigationContainer,
-	useIsFocused,
-	CommonActions,
-} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import styled, { css } from 'styled-components/native';
@@ -33,23 +29,12 @@ import Quiz from './components/Quiz';
 import Question from './components/Question';
 import NewQuestion from './components/NewQuestion';
 import NewDeck from './components/NewDeck';
-import { storeDecks, getDecks } from './utils/helpers';
+import { storeDecks, getDecks, setLocalNotification } from './utils/helpers';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { fetchUpdateAsync } from 'expo-updates';
 
-// import Decks from './components/Decks';
-// import Deck from './components/Deck';
-// import NewDeck from './components/NewDeck';
-
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-
-// Views Required
-// 1. Deck List - Default View
-// 2. Individual Deck View - title, number of cards, option to start quiz, option to add question
-// 3. Quiz View - card question, option to view answer (flip), correct button, incorrect  button, number of cards left, percentage correct
-// 4. New Deck view - enter in title for the new deck, submit new deck title
-// 5. New Question View - option to enter in question, enter in answer, submit new question
 
 export default function App({ route, navigation }) {
 	return (
@@ -60,7 +45,7 @@ export default function App({ route, navigation }) {
 						text: 'UdaciCards',
 						style: {
 							color: '#fff',
-							fontSize: '1em',
+							fontSize: 16,
 							fontWeight: '700',
 							fontFamily: 'Avenir-Book',
 						},
@@ -70,11 +55,11 @@ export default function App({ route, navigation }) {
 						justifyContent: 'space-around',
 						fontFamily: 'Avenir-Book',
 						fontWeight: '500',
-						fontSize: '16px',
+						fontSize: 16,
 					}}
 				/>
 				<NavigationContainer>
-					<Stack.Navigator style={{ backgroundColor: 'red' }}>
+					<Stack.Navigator>
 						<Stack.Screen
 							name="Decks"
 							component={Decks}
@@ -84,6 +69,7 @@ export default function App({ route, navigation }) {
 								headerTitleStyle: {
 									fontWeight: '500',
 								},
+								headerShown: false,
 							}}
 						/>
 						<Stack.Screen
@@ -164,7 +150,6 @@ function Decks({ route, navigation }) {
 }
 
 function CurrentDecks({ route, navigation }) {
-	const isFocused = useIsFocused();
 	const [isReady, setIsReady] = useState(false);
 	const [decks, setDecks] = useState({});
 
@@ -176,6 +161,7 @@ function CurrentDecks({ route, navigation }) {
 	}
 
 	useEffect(() => {
+		setLocalNotification();
 		const unsubscribe = navigation.addListener('focus', () => {
 			fetchData();
 		});
@@ -219,11 +205,11 @@ function CurrentDecks({ route, navigation }) {
 							h1
 							h1Style={{
 								color: 'rgb(68, 51, 255)',
-								fontWeight: 500,
+								fontWeight: '500',
 								fontFamily: 'Avenir-Heavy',
 								textAlign: 'center',
-								fontSize: '1.75em',
-								padding: '20px',
+								fontSize: 22,
+								padding: 10,
 							}}
 						>
 							Decks
@@ -234,16 +220,16 @@ function CurrentDecks({ route, navigation }) {
 									h2
 									h2Style={{
 										color: '#e91e63',
-										fontWeight: 500,
-										fontSize: '1em',
+										fontWeight: '500',
+										fontSize: 16,
 										fontFamily: 'Avenir-Heavy',
 										textAlign: 'center',
-										padding: '20px',
+										padding: 20,
 									}}
 								>
 									There are no decks to view
 								</Text>
-								<View style={styles.buttonsContainer}>
+								<View style={theme.buttonsContainer}>
 									<Button
 										title="Load Sample Deck"
 										onPress={onButtonClick}
@@ -258,12 +244,13 @@ function CurrentDecks({ route, navigation }) {
 							<Card key={deck[0]} style={{ flex: 1 }}>
 								<Card.Title
 									style={{
-										fontSize: '1.2em',
+										fontSize: 20,
 										color: '#000',
 										fontWeight: '500',
 										width: '100%',
 										textAlign: 'center',
 										fontFamily: 'Avenir-Heavy',
+										marginBottom: 10,
 									}}
 								>
 									{deck[1].title}
@@ -272,20 +259,19 @@ function CurrentDecks({ route, navigation }) {
 								<View>
 									<Text
 										style={{
-											fontSize: '1.0em',
-											color: '#000',
+											color: 'rgb(68, 51, 255)',
 											fontWeight: '500',
-											paddingBottom: '10px',
-											width: '100%',
+											fontSize: 18,
+											fontFamily: 'Avenir-Heavy',
 											textAlign: 'center',
-											fontFamily: 'Avenir-Medium',
+											padding: 10,
 										}}
 									>
 										{deck[1].questions.length} cards
 									</Text>
 								</View>
 								<View>
-									<View style={styles.buttonsContainer}>
+									<View style={theme.buttonsContainer}>
 										<Button
 											onPress={() => {
 												navigation.navigate('Deck', {
@@ -300,14 +286,6 @@ function CurrentDecks({ route, navigation }) {
 								</View>
 							</Card>
 						))}
-						{/*
-				<Text>Title of Each Deck</Text>
-				<Text>Number of Cards in Deck</Text>
-				 <Button
-					title="Go to Home"
-					onPress={() => navigation.navigate('Home')}
-				/>
-				<Button title="Go back" onPress={() => navigation.goBack()} /> */}
 					</View>
 				</View>
 			</ScrollView>
@@ -321,52 +299,31 @@ const theme = {
 	},
 	h1Style: {
 		color: 'red',
-		fontSize: '20px',
-		fontFamily: 'Avenir-Book',
-		textAlign: 'center',
-	},
-	h2: {
-		color: 'red',
-		fontSize: '20px',
+		fontSize: 20,
 		fontFamily: 'Avenir-Book',
 		textAlign: 'center',
 	},
 	Button: {
-		raised: true,
 		titleStyle: {
 			color: 'white',
-			fontSize: '1em',
+			fontSize: 14,
 		},
 		buttonStyle: {
-			flexDirection: 'row',
+			flex: 1,
+			flexDirection: 'column',
 			justifyContent: 'center',
 			alignItems: 'center',
 			backgroundColor: '#e60067',
-			padding: '20px 30px',
-			height: '40px',
-			padding: '10px',
-			borderRadius: '3px',
-			minWidth: '10em',
+			minWidth: 140,
 		},
-		containerStyle: {
-			textAlign: 'center',
-			flexDirection: 'row',
-			justifyContent: 'center',
-			alignItems: 'center',
-		},
-	},
-};
-
-const styles = StyleSheet.create({
-	contentView: {
-		flex: 1,
 	},
 	buttonsContainer: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
+		flex: 1,
+		flexDirection: 'column',
+		marginVertical: 10,
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '100%',
-		marginVertical: 20,
+		backgroundColor: 'transparent',
+		minHeight: 40,
 	},
-});
+};

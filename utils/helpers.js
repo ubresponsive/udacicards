@@ -1,4 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
+import * as Permissions from 'expo-permissions';
 
 const db = {
 	Deck1: {
@@ -25,6 +27,64 @@ const db = {
 		],
 	},
 };
+
+Notifications.setNotificationHandler({
+	handleNotification: async () => ({
+		shouldShowAlert: true,
+		shouldPlaySound: false,
+		shouldSetBadge: false,
+	}),
+});
+
+const NOTIFICATION_KEY = 'UdaciCards:notifications';
+
+export function clearLocalNotification() {
+	return AsyncStorage.removeItem(NOTIFICATION_KEY).then(
+		Notifications.cancelAllScheduledNotificationsAsync
+	);
+}
+
+function createNotification() {
+	return {
+		title: 'Log your stats!',
+		body: "👋 don't forget to do your quiz today",
+		ios: {
+			sound: true,
+		},
+		android: {
+			sound: true,
+			priority: 'high',
+			sticky: false,
+			vibrate: true,
+		},
+	};
+}
+
+export function setLocalNotification() {
+	AsyncStorage.getItem(NOTIFICATION_KEY)
+		.then(JSON.parse)
+		.then((data) => {
+			if (data === null) {
+				Permissions.askAsync(Permissions.NOTIFICATIONS).then(({ status }) => {
+					if (status === 'granted') {
+						Notifications.cancelAllScheduledNotificationsAsync();
+
+						let tomorrow = new Date();
+						tomorrow.setDate(tomorrow.getDate() + 1);
+						tomorrow.setHours(20);
+						tomorrow.setMinutes(0);
+
+						Notifications.scheduleNotificationAsync(createNotification(), {
+							time: tomorrow,
+							repeat: 'day',
+						});
+
+						AsyncStorage.setItem(NOTIFICATION_KEY, JSON.stringify(true));
+					}
+				});
+			}
+		});
+}
 
 // load data in localStorage
 export const storeDecks = async (reload) => {

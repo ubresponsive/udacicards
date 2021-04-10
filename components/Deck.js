@@ -18,11 +18,8 @@ import {
 } from 'react-native-elements';
 import styled, { css } from 'styled-components/native';
 import { getDeck, deleteDeck } from '../utils/helpers';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useIsFocused, CommonActions } from '@react-navigation/native';
 
 function Deck({ route, navigation }) {
-	const isFocused = useIsFocused();
 	const [isReady, setIsReady] = useState(false);
 	const [deck, setDeck] = useState({});
 	const [isError, setIsError] = useState(false);
@@ -81,92 +78,91 @@ function Deck({ route, navigation }) {
 	console.log('--deck-render');
 
 	return (
-		<View style={{ flex: 1, padding: 20, flexDirection: 'column' }}>
-			<Card style={{ flex: 1 }}>
-				<Card.Title
-					style={{
-						fontSize: '1.2em',
-						color: '#000',
-						fontWeight: '500',
-						width: '100%',
-						textAlign: 'center',
-						fontFamily: 'Avenir-Heavy',
-					}}
-				>
-					{title}
-				</Card.Title>
-				<Card.Divider />
-				<View>
-					<Text
-						h2
-						h2Style={{
-							color: 'rgb(68, 51, 255)',
-							fontWeight: 500,
-							fontSize: '20px',
-							fontFamily: 'Avenir-Heavy',
+		<ScrollView>
+			<View style={{ flex: 1, padding: 20 }}>
+				<Card style={{ flex: 1 }}>
+					<Card.Title
+						style={{
+							fontSize: 20,
+							color: '#000',
+							fontWeight: '500',
+							width: '100%',
 							textAlign: 'center',
-							fontSize: '1.75em',
-							padding: '20px',
+							fontFamily: 'Avenir-Heavy',
+							marginBottom: 10,
 						}}
 					>
-						{deck[1].questions.length} cards
-					</Text>
-				</View>
-				<View>
-					{isError && (
-						<Error>
-							Sorry, you cannot take a quiz because there are no cards in the
-							deck
-						</Error>
-					)}
-				</View>
-				<View>
-					<View style={styles.buttonsContainer}>
-						<Button
-							title="Add Card"
-							onPress={() => {
-								setIsError(false);
-								navigation.navigate('NewQuestion', {
-									title: `Add Card to ${title}`,
-									deckId: deckId,
-									otherParam: otherParam,
-								});
+						{title}
+					</Card.Title>
+					<Card.Divider />
+					<View>
+						<Text
+							h2
+							h2Style={{
+								color: 'rgb(68, 51, 255)',
+								fontWeight: '500',
+								fontSize: 18,
+								fontFamily: 'Avenir-Heavy',
+								textAlign: 'center',
+								padding: 10,
 							}}
-							containerStyle={{
-								marginVertical: 10,
-							}}
-						/>
-						<Button
-							onPress={() => startQuiz()}
-							title="Start Quiz"
-							bgColor="#160B8E"
-							buttonStyle={{
-								backgroundColor: 'rgb(68, 51, 255)',
-								borderRadius: 3,
-							}}
-							containerStyle={{
-								marginVertical: 10,
-							}}
-						/>
-						<Button
-							onPress={() => onDelete()}
-							type="clear"
-							titleStyle={{
-								color: '#000',
-								fontSize: '1em',
-							}}
-							buttonStyle={{
-								backgroundColor: 'transparent',
-							}}
-							containerStyle={{
-								marginVertical: 10,
-							}}
-							title="delete deck"
-						></Button>
+						>
+							{deck[1].questions.length} cards
+						</Text>
 					</View>
-				</View>
-			</Card>
-		</View>
+					{isError && (
+						<View style={{ flex: 1, padding: 10, flexDirection: 'column' }}>
+							<Error>
+								Sorry, you cannot take a quiz because there are no cards in the
+								deck
+							</Error>
+						</View>
+					)}
+					<View style={{ flex: 1, flexDirection: 'column' }}>
+						<View style={theme.buttonsContainer}>
+							<Button
+								title="Add Card"
+								onPress={() => {
+									setIsError(false);
+									navigation.navigate('NewQuestion', {
+										title: `Add Card to ${title}`,
+										deckId: deckId,
+										otherParam: otherParam,
+									});
+								}}
+							/>
+						</View>
+						<View style={theme.buttonsContainer}>
+							<Button
+								onPress={() => startQuiz()}
+								title="Start Quiz"
+								buttonStyle={{
+									backgroundColor: 'rgb(68, 51, 255)',
+									borderRadius: 3,
+								}}
+							/>
+						</View>
+						<View style={theme.buttonsContainer}>
+							<Button
+								onPress={() => onDelete()}
+								type="clear"
+								titleStyle={{
+									color: '#000',
+									fontSize: 16,
+								}}
+								buttonStyle={{
+									backgroundColor: 'transparent',
+								}}
+								containerStyle={{
+									marginVertical: 0,
+								}}
+								title="delete deck"
+							></Button>
+						</View>
+					</View>
+				</Card>
+			</View>
+		</ScrollView>
 	);
 }
 
@@ -178,15 +174,14 @@ const theme = {
 	},
 	h1Style: {
 		color: 'red',
-		fontSize: '20px',
+		fontSize: 20,
 		fontFamily: 'Avenir-Book',
 		textAlign: 'center',
 	},
 	Button: {
-		raised: true,
 		titleStyle: {
 			color: 'white',
-			fontSize: '1em',
+			fontSize: 14,
 		},
 		buttonStyle: {
 			flex: 1,
@@ -194,25 +189,29 @@ const theme = {
 			justifyContent: 'center',
 			alignItems: 'center',
 			backgroundColor: '#e60067',
-			padding: '20px 30px',
-			height: '40px',
-			padding: '10px',
-			borderRadius: '3px',
-			minWidth: '10em',
-			marginVertical: 20,
+			minWidth: 140,
 		},
-		containerStyle: {
-			textAlign: 'center',
-			flexDirection: 'row',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginVertical: 20,
-		},
+	},
+	buttonsContainer: {
+		flex: 1,
+		flexDirection: 'column',
+		marginVertical: 10,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'transparent',
+		minHeight: 40,
+	},
+	View: {
+		flex: 1,
+		display: 'flex',
+		width: '100%',
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 };
 
 const Error = styled.Text`
-	font-size: 1em;
+	font-size: 16px;
 	text-align: center;
 	font-family: 'Avenir-Book';
 	display: flex;
@@ -224,22 +223,9 @@ const Error = styled.Text`
 	margin: 10px auto 10px;
 	border-radius: 5px;
 	text-align: center;
-	border: 1px solid rgba(235, 67, 25, 0.925);
-	background: rgba(230, 182, 182, 0.925);
+	border-width: 1px;
+	border-color: rgba(235, 67, 25, 0.925);
+	background-color: rgba(230, 182, 182, 0.925);
 	padding: 15px;
 	color: rgba(214, 16, 16, 0.925);
 `;
-
-const styles = StyleSheet.create({
-	contentView: {
-		flex: 1,
-	},
-	buttonsContainer: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		justifyContent: 'center',
-		alignItems: 'center',
-		width: '100%',
-		marginVertical: 20,
-	},
-});
