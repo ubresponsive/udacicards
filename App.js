@@ -192,8 +192,6 @@ function CurrentDecks({ route, navigation }) {
 		);
 	}
 
-	console.log('--app-render');
-
 	const arrDb = Object.entries(decks);
 
 	return (

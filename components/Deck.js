@@ -75,8 +75,6 @@ function Deck({ route, navigation }) {
 		);
 	}
 
-	console.log('--deck-render');
-
 	return (
 		<ScrollView>
 			<View style={{ flex: 1, padding: 20 }}>

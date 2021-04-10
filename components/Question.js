@@ -21,8 +21,6 @@ import styled, { css } from 'styled-components/native';
 import { getDeck } from '../utils/helpers';
 
 function Question({ route, navigation }) {
-	// push index and hide button, activate silent onclick if another question exists
-	console.log('route.params', route.params);
 	const [isReady, setIsReady] = useState(false);
 	const { questions, deckId, qId } = route.params;
 	const [deck, setDeck] = useState({});
@@ -43,7 +41,6 @@ function Question({ route, navigation }) {
 	async function fetchData() {
 		const data = await getDeck(deckId);
 		setDeck(data);
-		console.log('data', data);
 		setCount(data[1].questions.length);
 		setIsReady(true);
 	}
@@ -70,9 +67,6 @@ function Question({ route, navigation }) {
 			</View>
 		);
 	}
-
-	console.log('count', count);
-	console.log('qId', qId);
 
 	return (
 		<ScrollView>

@@ -93,10 +93,8 @@ export const storeDecks = async (reload) => {
 		if (decks === null || reload) {
 			const jsonValue = JSON.stringify(db);
 			await AsyncStorage.setItem('decks', jsonValue);
-			console.log('--decks loaded in localstorage');
 			return;
 		} else {
-			console.log('--decks exists');
 			return;
 		}
 	} catch (e) {
@@ -108,7 +106,6 @@ export const storeDecks = async (reload) => {
 export const getDecks = async () => {
 	try {
 		const jsonValue = await AsyncStorage.getItem('decks');
-		console.log('--getDecks', JSON.parse(jsonValue));
 		return jsonValue != null ? JSON.parse(jsonValue) : null;
 	} catch (e) {
 		// error reading value
@@ -149,7 +146,6 @@ export const saveDeckTitle = async (title) => {
 	}
 	const decks = { ...parsedJson, ...newTitle };
 	await AsyncStorage.setItem('decks', JSON.stringify(decks));
-	console.log('--added-new-title', title);
 	return 'success';
 };
 
@@ -162,7 +158,6 @@ export const deleteDeck = async (title) => {
 
 	try {
 		await AsyncStorage.setItem('decks', JSON.stringify(newDeck));
-		console.log('--deleted-deck');
 		return 'success';
 	} catch (e) {
 		console.log('error removing title');
@@ -186,7 +181,6 @@ export const addCardToDeck = async (title, card) => {
 			Object.is(ques.question, currentCard.question) &&
 			Object.is(ques.answer, currentCard.answer) === true
 		) {
-			console.log('exists');
 			dup = true;
 			return;
 		}
@@ -200,10 +194,8 @@ export const addCardToDeck = async (title, card) => {
 			[title]: { title: title, questions: updatedDeck },
 		};
 		await AsyncStorage.setItem('decks', JSON.stringify(newDeck));
-		console.log('--added-new-question');
 		return 'success';
 	} else {
-		console.log('card already exists');
 		return 'error';
 	}
 };

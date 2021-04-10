@@ -6,7 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 function Quiz({ route, navigation }) {
 	// 3. Quiz View - card question, option to view answer (flip), correct button, incorrect  button, number of cards left, percentage correct
 	const { title, deckId, otherParam } = route.params;
-	console.log(deckId);
 	return (
 		<Container>
 			<View>
